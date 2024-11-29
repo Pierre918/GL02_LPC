@@ -1,1 +1,12 @@
-# GL02_LPC
+# README - Projet GL02 A24 - Sujet A : Gestion de salles
+
+## Utilisation
+
+
+## Implémentation des spécifications
+- SPEC 7 : Non implémentée car trop élaborée.
+- SPEC 6 : l'utilisateur doit fournir son nom et les UE auxquelles il participe car ces informations ne sont autrement pas fournies.
+
+## Implémentation des objets
+- Objet CRNO
+  - À la création de l'objet, on doit fournir l'UE, le jour, l'horaire de début, l'horaire de fin, la salle et la capacité
