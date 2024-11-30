@@ -20,7 +20,7 @@ CruParser.prototype.tokenize = function(data){
 	var toBeRemoved = /(\r\n|=|,)/;
 	var splitter = /(\r\n|=|,|\+|Page|F|\/\/)/;
 	data = data.split(splitter);
-	data = data.filter((val, idx) => !val.match(toBeRemoved) && val !== '');			
+	data = data.filter((val, idx) => !val.match(toBeRemoved) && val !== '');
 	return data;
 }
 
@@ -38,10 +38,10 @@ CruParser.prototype.parse = function(data){
 CruParser.prototype.errMsg = function(msg, input){
 	this.errorCount++;
 	if(input !== undefined){
-	   console.log("Parsing Error ! on " + input + " -- msg : " + msg);
+	   console.log("Erreur de parsing ! sur " + input + " -- msg : " + msg);
 	}
 	else{
-	   console.log("Parsing Error ! -- msg : " + msg);
+	   console.log("Erreur de parsing ! -- msg : " + msg);
 	}
 }
 
@@ -59,7 +59,7 @@ CruParser.prototype.accept = function(s){
 	var idx = this.symb.indexOf(s);
 	// index 0 exists
 	if(idx === -1){
-		this.errMsg("symbol " + s + " unknown", [" "]);
+		this.errMsg("symbole " + s + " inconnu", [" "]);
 		return false;
 	}
 
@@ -77,10 +77,10 @@ CruParser.prototype.check = function(s, input){
 // expect : expect the next symbol to be s.
 CruParser.prototype.expect = function(s, input){
 	if(s == this.next(input)){
-		//console.log("Reckognized! " + s);
+		//console.log("Reconnu ! " + s);
 		return true;
 	}else{
-		this.errMsg("symbol " + s + " doesn't match", input);
+		this.errMsg("le symbole " + s + " ne correspond pas à ", input);
 	}
 	return false;
 }
@@ -88,8 +88,14 @@ CruParser.prototype.expect = function(s, input){
 
 // Parser rules
 
-// <liste_ue> = *(<ue>) "Page" *VCHAR
+// <liste_ue> = <txtDebut> *(<ue>) "Page" *VCHAR
 CruParser.prototype.listUE = function(input){
+	let endOfTxt = input.indexOf("UVUV");
+	let i = 0;
+	while(i<=endOfTxt || input[0]!=='+'){
+	   input.shift();
+	  i++;
+	}
 	this.listCrno(input);
 	this.expect("Page", input);
 }
