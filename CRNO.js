@@ -32,7 +32,9 @@ CRNO.prototype.memeUE = function(crno){
 };
 
 CRNO.prototype.plusTard = function(crno){
-	return this.jour === crno.jour && this.hfin > crno.hfin;
+    let thisStartHour = parseInt(this.hdeb.split(':')[0]);
+    let otherStartHour = parseInt(crno.hdeb.split(':')[0]);
+	return this.jour === crno.jour && thisStartHour > otherStartHour;
 };
 
 CRNO.prototype.plusGrand = function(crno){
