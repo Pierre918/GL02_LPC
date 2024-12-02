@@ -178,8 +178,8 @@ CruParser.prototype.capacite = function (input){
 CruParser.prototype.creneau = function(input){
 	this.expect("H",input)
 	var curS = this.next(input);
-	if(matched = curS.match(/(L|(MA)|(ME)|J|V|S|D) (\d(\d)?:\d\d)-(\d(\d)?:\d\d)/)){
-		return { jor: matched[1], hdeb: matched[3], hfin: matched[5] };
+	if(matched = curS.match(/(L|MA|ME|J|V|S|D) (\d(\d)?:\d\d)-(\d(\d)?:\d\d)/)){
+		return { jor: matched[1], hdeb: matched[2], hfin: matched[4] };
 	}else{
 		this.errMsg("Créneau non valide", curS);
 		return { jor: "", hdeb: "", hfin: "" };
