@@ -96,7 +96,6 @@ CruParser.prototype.listUE = function(input){
 	   input.shift();
 	  i++;
 	}
-	//let ue = this.ue(input);
 	this.listCrno(input);
 	this.expect("Page", input);
 }

@@ -4,7 +4,7 @@ const parser = require('./CruParser.js');
 //moi
 const path = require('path');
 const ical = require('ical-generator').default
-const {parseCruData, generateICal, getSallesByUE, checkForConflicts} = require('./fonction_check.js')
+const {parseCruData, generateICal, getSallesByUE, checkForConflicts, isValidCruFile} = require('./fonction_check.js')
 
 //
 const vg = require('vega');
@@ -36,14 +36,10 @@ cli
 	.command('check', 'Verifier si <repertoire> contient des salles réservées plusieurs fois sur le même créneau')
 	.argument('<repertoire>', 'Le répertoire à vérifier')
 	.action((args,logger) => { 
-		console.log(args)
-		console.log(args.args.repertoire)
+		
 		// Correction ici pour passer les arguments correctement 
 		console.log(`Vérification des conflits dans le répertoire: ${args.args.repertoire}`); 
-		/*const cruFiles = fs.readdirSync(args.args.repertoire) 
-			.filter(file => path.extname(file) === '.cru') 
-			.map(file => readCruFile(path.join(args.args.repertoire, file))); 
-		console.log(`Fichiers lus: ${cruFiles.length}`); */
+		
 		const conflicts = checkForConflicts(args.args.repertoire); 
 		if (conflicts.length === 0) { 
 			console.log('Aucun conflit de réservation de salle trouvé.'); 
@@ -62,7 +58,14 @@ cli
 		console.log(args);
 		const cruFiles = fs.readdirSync(args.repertoire) 
         .filter(file => path.extname(file) === '.cru') 
-        .map(file => readCruFile(path.join(args.repertoire, file))); 
+		.map(file => { const content = readCruFile(path.join(args.repertoire, file)); 
+			if (!isValidCruFile(content)) { 
+				console.log(`Fichier invalide trouvé: ${file}`); 
+				process.exit(1); // Arrêtez la commande 
+				} 
+			return content; 
+		});
+        /*.map(file => readCruFile(path.join(args.repertoire, file))); */
 		 
 		const salles = getSallesByUE(args.ue,cruFiles); 
 		console.log(salles)

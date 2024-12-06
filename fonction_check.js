@@ -38,6 +38,16 @@ function generateICal(courses, outputFilename) {
     
 }
 
+function isValidCruFile(content) { 
+    try { parseCruData(content); // Tente de parser le contenu pour vérifier la validité 
+        console.log("ok")
+        return true; // Si aucun erreur n'est levée, le fichier est valide 
+    } catch (error) { 
+        console.log(`Invalid CRU file detected: ${error.message}`); 
+        return false; // Si une erreur est levée, le fichier est invalide 
+        } 
+    }
+
 function getSallesByUE(ue,cruFiles) { 
     const courses = cruFiles.flatMap(parseCruData) 
         .filter(course => course.ue && course.ue.trim().toLowerCase() === ue.trim().toLowerCase()); 
@@ -59,16 +69,18 @@ function checkForConflicts(repertoire) {
         const scheduleMap = {}; 
         const conflicts = []; 
         courses.forEach(course => { 
-            const key = `${course.jour}_${course.hdeb}_${course.hfin}`; 
+            const key = `${course.jour}_${course.hdeb}_${course.hfin}_${course.salle}`; 
             if (!scheduleMap[key]) { scheduleMap[key] = new Set(); } 
-            if (scheduleMap[key].has(course.salle)) { 
-                conflicts.push(`Conflit: Salle ${course.salle} réservée plusieurs fois le ${course.jour} de ${course.hdeb} à ${course.hfin}`); 
-            } 
-            else { 
-                scheduleMap[key].add(course.salle); 
-            } 
-        }); 
+            
+            // Si la salle est déjà réservée pour un créneau par une autre UE, il y a un conflit 
+            if (scheduleMap[key].size > 0 && !scheduleMap[key].has(course.ue)) { 
+                conflicts.push(`Conflit: Salle ${course.salle} réservée plusieurs fois le ${course.jour} de ${course.hdeb} à ${course.hfin} 
+                    pour les UEs ${Array.from(scheduleMap[key]).join(', ')} et ${course.ue}`);
+            }
+        
+            scheduleMap[key].add(course.ue);
+        })
         return conflicts; 
 }
 
-module.exports = {generateICal,parseCruData , getSallesByUE, checkForConflicts};
+module.exports = {generateICal,parseCruData , getSallesByUE, checkForConflicts, isValidCruFile};
