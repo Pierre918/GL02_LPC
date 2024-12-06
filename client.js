@@ -1,5 +1,4 @@
 const fs = require('fs');
-//const colors = require('colors');
 const parser = require('./CruParser.js');
 
 //moi
@@ -10,7 +9,6 @@ const {parseCruData, generateICal, getSallesByUE, checkForConflicts} = require('
 //
 const vg = require('vega');
 const vegalite = require('vega-lite');
-
 const cli = require("@caporal/core").default;
 
 //moi
@@ -30,7 +28,6 @@ fs.readdir(__dirname, { recursive: true }, (err, files) => {
 
 
 
-
 cli
 	.version('-parser-cli')
 	.version('0.01')
@@ -38,14 +35,16 @@ cli
 	// check CRU
 	.command('check', 'Verifier si <repertoire> contient des salles réservées plusieurs fois sur le même créneau')
 	.argument('<repertoire>', 'Le répertoire à vérifier')
-	.action((repertoire) => { 
+	.action((args,logger) => { 
+		console.log(args)
+		console.log(args.args.repertoire)
 		// Correction ici pour passer les arguments correctement 
-		console.log(`Vérification des conflits dans le répertoire: ${repertoire}`); 
-		const cruFiles = fs.readdirSync(repertoire) 
+		console.log(`Vérification des conflits dans le répertoire: ${args.args.repertoire}`); 
+		/*const cruFiles = fs.readdirSync(args.args.repertoire) 
 			.filter(file => path.extname(file) === '.cru') 
-			.map(file => readCruFile(path.join(repertoire, file))); 
-		console.log(`Fichiers lus: ${cruFiles.length}`); 
-		const conflicts = checkForConflicts(repertoire); 
+			.map(file => readCruFile(path.join(args.args.repertoire, file))); 
+		console.log(`Fichiers lus: ${cruFiles.length}`); */
+		const conflicts = checkForConflicts(args.args.repertoire); 
 		if (conflicts.length === 0) { 
 			console.log('Aucun conflit de réservation de salle trouvé.'); 
 		} 

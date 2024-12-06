@@ -4,6 +4,7 @@ const path = require('path');
 const CruParser = require('./CruParser');
 const CRNO = require('./CRNO');
 
+function readCruFile(filepath) { return fs.readFileSync(filepath, 'utf-8'); }
 
 function parseCruData(data) {
     const parser = new CruParser(true, true); // Initialiser le parser avec les options de débogage
