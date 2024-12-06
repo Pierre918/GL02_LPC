@@ -304,26 +304,210 @@ cli
 	.argument('<salle...>', 'La ou les salle(s) dont on veut afficher les créneaux libres')
 	.argument('<repertoire>', 'Le répertoire à utiliser')
 	.action(({args, logger}) => {	
-	   // À IMPLÉMENTER
+        // À IMPLÉMENTER
+        var analyzer = new CruParser();
+	    // Pour récupérer les fichiers .cru
+	    fs.readdir(args.repertoire, { recursive: true }, (err, files) => {
+            if (err)
+			     return logger.warn(err);
+            else {
+                files.forEach(file => {
+                    if (path.extname(file) == ".cru"){
+                        fs.readFile(file, 'utf8', function (err,data) {
+			                if (err) {
+                				return logger.warn(err);
+                			}
+                	  
+                			analyzer.parse(data);
+                			
+                			if(analyzer.errorCount !== 0){
+    				            logger.info("Le fichier " + file + " contient une erreur".red);
+    				        }
+                		});
+                    }
+                })
+                			
+                if(analyzer.errorCount !== 0){
+    			     logger.info("Le répertoire .cru contient une erreur".red);
+    			}else{
+                     let jours = ["L", "MA", "ME", "J", "V", "S"];
+                     let heures = [8,9,10,11,12,13,14,15,16,17,18,19];
+    			     args.salle.forEach(salle => {
+    			         logger.info(salle + " disponible : ");
+    			         let concernedCrno = analyzer.parsedCRNO.filter(crno => crno.salle === salle);
+    			         jours.forEach(jour =>{
+    			             logger.info(" - " + jour);
+    			             let heuresPrises = []
+    			             concernedCrno.filter(crno => crno.jour === jour).forEach(crno => {
+    			                 let firstHour = parseInt(crno.hdeb.split(':')[0]);
+    			                 let lastHour = parseInt(crno.hfin.split(':')[0]);
+    			                 while(firstHour !== lastHour){
+    			                     heuresPrises.push(firstHour);
+    			                     firstHour = firstHour+1;
+    			                 }
+    			             });
+    			             let startHour = heures[0];
+    			             let endHour = heures[heures.length - 1];
+    			             heures.forEach(heure =>{
+    			                 if(heuresPrises.includes(heure)){
+    			                   if(startHour !== heure){
+    			                     logger.info("    - " + startHour + ":00-" + heure + ":00");
+    			                   }
+    			                   startHour = heures[heures.indexOf(heure)+1];
+    			                 }
+    			             });
+    			             if(startHour !== endHour){
+    			                logger.info("    - " + startHour + ":00-" + endHour + ":00");
+    			             }
+    			         });
+    			         logger.info("");
+    			     });
+    			}
+    			
+            }
+        })
+
 	})	
 
 	// salles libres 
 	.command('sallesLibres', 'Afficher les salles libres sur le créneau du <jour> de <heureDebut> à <heureFin> à partir des données de <repertoire>')
-	.argument('<jour>', 'Le jour du créneau')
-	.argument('<heureDebut>', "L'heure de début du créneau")
-	.argument('<heureFin>', "L'heure de fin du créneau")
+	.argument('<jour>', 'Le jour du créneau, l, MA, ME, J, V ou S')
+	.argument('<heureDebut>', "L'heure de début du créneau, au format hh:mm")
+	.argument('<heureFin>', "L'heure de fin du créneau, au format hh:mm")
 	.argument('<repertoire>', 'Le répertoire à utiliser')
 	.action(({args, logger}) => {	
-	   // À IMPLÉMENTER
+	   /// À IMPLÉMENTER
+        let jours = ["L", "MA", "ME", "J", "V", "S"];
+        if(!jours.includes(args.jour)){
+            return logger.warn("Le terme " + args.jour + " n'est pas un jour valide'");
+        }
+        var analyzer = new CruParser();
+	    // Pour récupérer les fichiers .cru
+	    fs.readdir(args.repertoire, { recursive: true }, (err, files) => {
+            if (err)
+			     return logger.warn(err);
+            else {
+                files.forEach(file => {
+                    if (path.extname(file) == ".cru"){
+                        fs.readFile(file, 'utf8', function (err,data) {
+			                if (err) {
+                				return logger.warn(err);
+                			}
+                	  
+                			analyzer.parse(data);
+                			
+                			if(analyzer.errorCount !== 0){
+    				            logger.info("Le fichier " + file + " contient une erreur".red);
+    				        }
+                		});
+                    }
+                })
+                			
+                if(analyzer.errorCount !== 0){
+    			     logger.info("Le répertoire .cru contient une erreur".red);
+    			}else{
+                     let crnoConcurrents = analyzer.parsedCRNO.filter(crno => {
+                        let crnoStartHour = parseInt(crno.hdeb.split(':')[0]);
+                        let crnoEndHour = parseInt(crno.hfin.split(':')[0]);
+                    	return args.jour === crno.jour && (args.heureDebut < crnoEndHour && args.heureFin > crnoStartHour);
+                     });
+                     let sallesPrises = [];
+                     crnoConcurrents.forEach(crno => {
+                        if(!sallesPrises.includes(crno.salle)){
+                            sallesPrises.push(crno.salle);
+                        }
+                     });
+                     let sallesLibres = [];
+                     analyzer.parsedCRNO.forEach(crno => {
+                        if(!sallesPrises.includes(crno.salle) && !sallesLibres.includes(crno.salle)){
+                            sallesLibres.push(crno.salle);
+                        }
+                     });
+                     sallesLibres.sort().forEach(salle => logger.info(salle));
+                        
+                }
+    			
+            }
+        })
 	})	
 
 	// graphique de l'occupation des salles
 	.command('graphique', 'Afficher un graphique du nombre de salles occupées en fonction du créneau à partir des données de <repertoire>')
-	.option('-j --jour', 'afficher le nombre de salles occupées en fonction du jour de la semaine', { validator : cli.BOOLEAN, default: false })
 	.argument('<repertoire>', 'Le répertoire à utiliser')
 	.action(({args, options, logger}) => {	
-	   // À IMPLÉMENTER
-	})	
+        // À IMPLÉMENTER
+        var analyzer = new CruParser();
+        
+	    fs.readdir(args.repertoire, { recursive: true }, (err, files) => {
+            if (err)
+			     return logger.warn(err);
+            else {
+                files.forEach(file => {
+                    if (path.extname(file) == ".cru"){
+                        fs.readFile(file, 'utf8', function (err,data) {
+			                if (err) {
+                				return logger.warn(err);
+                			}
+                	  
+                			analyzer.parse(data);
+                			
+                			if(analyzer.errorCount !== 0){
+    				            logger.info("Le fichier " + file + " contient une erreur".red);
+    				        }
+                		});
+                    }
+                })
+                			
+                if(analyzer.errorCount !== 0){
+    			     logger.info("Le répertoire .cru contient une erreur".red);
+    			}else{
+                    let heures = [8,9,10,11,12,13,14,15,16,17,18,19];
+    			     
+    			    var stats = heures.map(heure => {
+        				let creneau = {};
+        				creneau.["nom"] =  heure + ":00-" + (heure+1) + ":00";
+				        let crnoConcurrents = analyzer.parsedCRNO.filter(crno => {
+    			            let crnoStartHour = parseInt(crno.hdeb.split(':')[0]);
+                            let crnoEndHour = parseInt(crno.hfin.split(':')[0]);
+                            return (crnoStartHour < (heure+1) && crnoEndHour > heure);
+    			         });
+    			         
+    			         creneau.["nbSallesPrises"] = crnoConcurrents.length;
+        				
+        				return creneau;
+        			})
+
+
+                    var statsChart = {
+                        "data" : {
+        				    "values" : stats
+        				},
+        				"mark" : "bar",
+        				"encoding" : {
+        				    "x" : {"field" : "nom", "type" : "nominal",
+        							"axis" : {"title" : "Créneau"}
+        					},
+        					"y" : {"field" : "nbSallesPrises", "type" : "quantitative",
+        							"axis" : {"title" : "Nombre de salles prises"}
+        					}
+        				}
+        			}   
+        			const myChart = vegalite.compile(statsChart).spec;
+			
+			        /* SVG version */
+        			var runtime = vg.parse(myChart);
+        			var view = new vg.View(runtime).renderer('svg').run();
+        			var mySvg = view.toSVG();
+        			mySvg.then(function(res){
+        				fs.writeFileSync("./result.svg", res)
+        				view.finalize();
+        				logger.info("%s", JSON.stringify(myChart, null, 2));
+        				logger.info("Chart output : ./result.svg");
+        			});
+                }
+            }
+        })
+	})		
 
 	
 
