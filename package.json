@@ -10,6 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "colors": "^1.4.0"
+    "@caporal/core": "^2.0.7",
+    "colors": "^1.4.0",
+    "ical": "^0.8.0",
+    "ical-generator": "^8.0.1",
+    "vega": "^5.30.0",
+    "vega-lite": "^5.21.0"
   }
 }
