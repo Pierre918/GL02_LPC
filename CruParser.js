@@ -147,7 +147,7 @@ CruParser.prototype.ue = function(input){
 	this.expect("+",input)
 	var curS = this.next(input);
 	if(matched = curS.match(/([A-Z][A-Z]\d\d)/)){
-		return matched[2];
+		return matched[1];
 	}else{
 		this.errMsg("UE non valide", curS);
 	}
