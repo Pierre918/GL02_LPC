@@ -71,9 +71,9 @@ $ node client.js calendrier <repertoire>
     <jourFin>
       Le jour où doit finir le calendrier
     <nom>
-      Le nom de l'utilisateur")
+      Le nom de l'utilisateur
     <UE>
-      Les UEs à ajouter au calendrier") 
+      Les UEs à ajouter au calendrier
  ```
   
 ## Implémentation des spécifications
