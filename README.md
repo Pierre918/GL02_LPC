@@ -58,7 +58,9 @@ $ node client.js graphique <repertoire>
       Le répertoire à utiliser
             
 $ node client.js classer <repertoire> 
-  Affiche un tableau avec la capacité maximale d'accueil des salles et le nombre de salles par capacité d'accueil à partir des données de <repertoire>       
+  Affiche un tableau avec la capacité maximale d'accueil des salles et le nombre de salles, par ordre croissant de capacité d'accueil à partir des données de <repertoire>       
+    <-d, ---decroissant>
+      Range par ordre décroissant la capacité maximale des salles
     <repertoire>
       Le répertoire à utiliser
                           
