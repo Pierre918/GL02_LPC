@@ -23,10 +23,10 @@ $ npm install
 
 
 ## Utilisation
-
-`$ node client.js check <repertoire>   `
+```
+$ node client.js check <repertoire>  
   Verifie si `<repertoire>` contient des salles réservées plusieurs fois sur le même créneau	
-    <repertoire>
+    `<repertoire>`
       Le répertoire à utiliser			  
 
 $ node client.js sallesUE `<repertoire>` `<UE>`  
@@ -83,7 +83,7 @@ $ node client.js calendrier `<repertoire>` `<UE>` `<nom>` `<jourFin>` `<jourDebu
       Le nom de l'utilisateur")
     `<UE>`
       Les UEs à ajouter au calendrier") 
-    
+```    
  
 ## Implémentation des spécifications
 
