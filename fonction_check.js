@@ -1,15 +1,36 @@
 const ical = require('ical-generator').default;
+const colors = require('colors');
 const fs = require('fs');
 const path = require('path');
 const CruParser = require('./CruParser');
 const CRNO = require('./CRNO');
 
-function readCruFile(filepath) { return fs.readFileSync(filepath, 'utf-8'); }
+function parseCruDirectory(parser, directorypath, logger) {
+    let files = fs.readdirSync(directorypath, {recursive: true });
+	try{
+       files.forEach(file => {
+                if (path.extname(file) === ".cru"){
+                    parseCruFile(parser, directorypath + file, logger);
+                }
+         })
+    }catch (err){
+	    logger.warn(err);
+    }
+}
 
-function parseCruData(data) {
-    const parser = new CruParser(true, true); // Initialiser le parser avec les options de débogage
-    parser.parse(data);
-    return parser.parsedCRNO; // Retourner les objets CRNO analysés
+function parseCruFile(parser, filepath, logger) {
+    try{
+    	let data = fs.readFileSync(filepath, 'utf8');
+    	
+    	parser.parse(data);
+    	
+		if(parser.errorCount !== 0){
+            logger.info(("Le fichier " + filepath + " contient une erreur.").red);
+        }
+    
+    }catch(err){;
+		logger.warn(err);
+    }
 }
 
 function generateICal(courses, outputFilename) {
@@ -38,49 +59,30 @@ function generateICal(courses, outputFilename) {
     
 }
 
-function isValidCruFile(content) { 
-    try { parseCruData(content); // Tente de parser le contenu pour vérifier la validité 
-        console.log("ok")
-        return true; // Si aucun erreur n'est levée, le fichier est valide 
-    } catch (error) { 
-        console.log(`Invalid CRU file detected: ${error.message}`); 
-        return false; // Si une erreur est levée, le fichier est invalide 
-        } 
-    }
 
-function getSallesByUE(ue,cruFiles) { 
-    const courses = cruFiles.flatMap(parseCruData) 
-        .filter(course => course.ue && course.ue.trim().toLowerCase() === ue.trim().toLowerCase()); 
+function getSallesByUE(ue, crno) { 
+    courses = crno.filter(course => course.ue && course.ue.trim().toLowerCase() === ue.trim().toLowerCase()); 
     const salles = new Set(courses.map(course => course.salle)); 
     return [...salles]; 
 }
 
-function checkForConflicts(repertoire) {
-    // Vérifiez que 'repertoire' est une chaîne de caractères
-    console.log(repertoire)
-    if (typeof repertoire !== 'string') { 
-        throw new Error(`Expected a string for 'repertoire', but got ${typeof repertoire}`); 
-    } 
-    const cruFiles = fs.readdirSync(repertoire) 
-        .filter(file => path.extname(file) === '.cru') 
-        .map(file => readCruFile(path.join(repertoire, file))); 
-        const courses = cruFiles.flatMap(parseCruData); 
-        // Utiliser un dictionnaire pour stocker les réservations de salles par créneau horaire 
-        const scheduleMap = {}; 
-        const conflicts = []; 
-        courses.forEach(course => { 
-            const key = `${course.jour}_${course.hdeb}_${course.hfin}_${course.salle}`; 
-            if (!scheduleMap[key]) { scheduleMap[key] = new Set(); } 
-            
-            // Si la salle est déjà réservée pour un créneau par une autre UE, il y a un conflit 
-            if (scheduleMap[key].size > 0 && !scheduleMap[key].has(course.ue)) { 
-                conflicts.push(`Conflit: Salle ${course.salle} réservée plusieurs fois le ${course.jour} de ${course.hdeb} à ${course.hfin} 
-                    pour les UEs ${Array.from(scheduleMap[key]).join(', ')} et ${course.ue}`);
-            }
+function checkForConflicts(courses) {
+    // Utiliser un dictionnaire pour stocker les réservations de salles par créneau horaire 
+    const scheduleMap = {}; 
+    const conflicts = []; 
+    courses.forEach(course => { 
+        const key = `${course.jour}_${course.hdeb}_${course.hfin}_${course.salle}`; 
+        if (!scheduleMap[key]) { scheduleMap[key] = new Set(); } 
         
-            scheduleMap[key].add(course.ue);
-        })
-        return conflicts; 
+        // Si la salle est déjà réservée pour un créneau par une autre UE, il y a un conflit 
+        if (scheduleMap[key].size > 0 && !scheduleMap[key].has(course.ue)) { 
+            conflicts.push(`Conflit: Salle ${course.salle} réservée plusieurs fois le ${course.jour} de ${course.hdeb} à ${course.hfin} 
+                pour les UEs ${Array.from(scheduleMap[key]).join(', ')} et ${course.ue}`);
+        }
+    
+        scheduleMap[key].add(course.ue);
+    })
+    return conflicts; 
 }
 
-module.exports = {generateICal,parseCruData , getSallesByUE, checkForConflicts, isValidCruFile};
+module.exports = {parseCruDirectory, parseCruFile, generateICal , getSallesByUE, checkForConflicts};
