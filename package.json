@@ -1,7 +1,7 @@
 {
   "name": "gl02_lpc",
   "version": "1.0.0",
-  "description": "- SPEC 7 : Non implémentée car trop élaborée.\r - SPEC 6 : l'utilisateur doit fournir son nom et les UE auxquelles il participe car ces informations ne sont autrement pas fournies.",
+  "description": "Offer an interface for a recursive descent parser implemented in Javascript for reading and processing the CRU format. This format allows to describe a list of time slots where rooms and to describe how they are used. The files are in text format and should respect the following grammar.",
   "main": "client.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
