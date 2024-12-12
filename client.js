@@ -196,14 +196,14 @@ cli
         }
     })	
 
-	// salles libres 
-	.command('sallesLibres', 'Afficher les salles libres sur le créneau du <jour> de <heureDebut> à <heureFin> à partir des données de <fichier>')
-	.argument('<fichier>', 'Le fichier .cru à lire')
-	.argument('<jour>', 'Le jour du créneau, L, MA, ME, J, V ou S')
-	.argument('<heureDebut>', "L'heure de début du créneau, au format hh:mm")
-	.argument('<heureFin>', "L'heure de fin du créneau, au format hh:mm")
-	.option('-r, --repertoire', "Lire un répertoire de manière récursive au lieu d'un fichier", { validator : cli.BOOLEAN, default: false })
-	.action(({args, options, logger}) => {	
+// salles libres 
+.command('sallesLibres', 'Afficher les salles libres sur le créneau du <jour> de <heureDebut> à <heureFin> à partir des données de <fichier>')
+.argument('<fichier>', 'Le fichier .cru à lire')
+.argument('<jour>', 'Le jour du créneau, L, MA, ME, J, V ou S')
+.argument('<heureDebut>', "L'heure de début du créneau, au format hh:mm")
+.argument('<heureFin>', "L'heure de fin du créneau, au format hh:mm")
+.option('-r, --repertoire', "Lire un répertoire de manière récursive au lieu d'un fichier", { validator : cli.BOOLEAN, default: false })
+.action(({args, options, logger}) => {	
         // Vérifier le bon format des arguments
         let jours = ["L", "MA", "ME", "J", "V", "S"];
         if(!jours.includes(args.jour)){
@@ -354,16 +354,16 @@ cli
 
 	
 
-	// fichier iCalendar
-	// https://icalendar.org/validator.html <= testeur de fichier icalendar
-	.command('calendrier', 'Afficher les salles utilisées par <UE> à partir des données de <fichier>')
-	.argument('<fichier>', 'Le fichier .cru à lire')
-	.argument('<jourDebut>', 'Le jour où doit débuter le calendrier')
-	.argument('<jourFin>', 'Le jour où doit finir le calendrier')
-	.argument('<nom>', "Le nom de l'utilisateur")
-	.argument('<UE>', "Les UEs à ajouter au calendrier") 
-	.option('-r, --repertoire', "Lire un répertoire de manière récursive au lieu d'un fichier", { validator : cli.BOOLEAN, default: false })
-	.action(({ args, options, logger }) => { 
+// fichier iCalendar
+// https://icalendar.org/validator.html <= testeur de fichier icalendar
+.command('calendrier', 'Créer un fichier iCalendar avec le nom <nom>.cru, allant de <jourDebut> à <jourFin>, contenant les événements des <UE> à partir des données de <fichier>')
+.argument('<fichier>', 'Le fichier .cru à lire')
+.argument('<jourDebut>', 'Le jour où doit débuter le calendrier')
+.argument('<jourFin>', 'Le jour où doit finir le calendrier')
+.argument('<nom>', "Le nom de l'utilisateur")
+.argument('<UE...>', "La liste des UE à ajouter au calendrier") 
+.option('-r, --repertoire', "Lire un répertoire de manière récursive au lieu d'un fichier", { validator : cli.BOOLEAN, default: false })
+.action(({ args, options, logger }) => { 
 	   // Vérifier le bon format des arguments
         let jours = ["L", "MA", "ME", "J", "V", "S"];
         if(!jours.includes(args.jourDebut)){
