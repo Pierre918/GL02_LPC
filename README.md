@@ -1,4 +1,4 @@
-# RE# README - Projet GL02 A24 - Sujet A : Gestion de salles
+# README - Projet GL02 A24 - Sujet A : Gestion de salles
 ## Description 
 Destiné aux gestionnaires, aux enseignants, et aux étudiants, ce logiciel en ligne de commande permet de visualiser et d'analyser les taux d’occupation des salles, de consulter leur disponibilité, et de faciliter l’importation d'emplois du temps dans des applications de calendrier personnel via des fichiers iCalendar. Ce logiciel est équipé d'un parser (Cruparser) qui permet de récupérer les données nécéssaires au fonctionnement du logiciel. Pour obtenir un graphique de l'occupation des salles il est nécéssaire d'avoir installé en amont vega et vega-lite.
 
@@ -19,63 +19,61 @@ $ npm install
 
 ## Utilisation
 ```
-$ node client.js check <repertoire>   
-  Verifie si <repertoire> contient des salles réservées plusieurs fois sur le même créneau	
-    <repertoire>
-      Le répertoire à utiliser			  
-$ node client.js sallesUE <repertoire> <UE>  
-  Affiche les salles utilisées par <UE> à partir des données de <repertoire>
-    <repertoire>
-      Le répertoire à utiliser
-    <UE>
-      L'UE dont on veut afficher les salles
-$ node client.js capacite <repertoire> <salle>  
-  Affiche la capacité de <salle> à partir des données de <repertoire>
-    <repertoire>
-      Le répertoire à utiliser
-    <salle>  
-      La salle dont on veut afficher la capacite
+$ node client.js check <fichier> [-r]
+Verifie si <fichier> contient des salles réservées plusieurs fois sur le même créneau
+    <fichier>          Le fichier .cru à lire
+	  -r, --repertoire   Lire un répertoire de manière récursive au lieu d'un fichier
+	  
+$ node client.js sallesUE <fichier> <UE> [-r] 
+Affiche les salles utilisées par <UE> à partir des données de <repertoire>
+    <fichier>          Le fichier .cru à lire
+	  <UE>               L'UE dont on veut afficher les salles
+	  -r, --repertoire   Lire un répertoire de manière récursive au lieu d'un fichier
+
+$ node client.js capacite <fichier> <salle> [-r]
+Affiche la capacité de <salle> à partir des données de <fichier>
+    <fichier>          Le fichier .cru à lire
+	  <salle>            La salle dont on veut afficher la capacite
+	  -r, --repertoire   Lire un répertoire de manière récursive au lieu d'un fichier
          
-$ node client.js creneau <repertoire> <salle>  
-  Affiche les créneaux où <salle> est libre à partir des données de <repertoire>    
-    <repertoire>
-      Le répertoire à utiliser
-    <salle>  
-      La ou les salle(s) dont on veut afficher les créneaux libres                        
-$ node client.js sallesLibres <repertoire> <jour> <heureDebut> <heureFin> 
-  Affiche les salles libres sur le créneau du <jour> de <heureDebut> à <heureFin> à partir des données de <repertoire>
-    <repertoire>
-      Le répertoire à utiliser 
-    <jour>  
-      Le jour du créneau, L, MA, ME, J, V ou S
-    <heureDebut>
-      L'heure de début du créneau, au format hh:mm
-    <heureFin> 
-      L'heure de fin du créneau, au format hh:mm
-$ node client.js graphique <repertoire> 
-  Affiche un graphique du nombre de salles occupées en fonction du créneau à partir des données de <repertoire>
-    <repertoire>
-      Le répertoire à utiliser
+$ node client.js creneau <fichier> <salle> [-r]
+Affiche les créneaux où <salle> est libre à partir des données de <ficher>    
+    <fichier>          Le fichier .cru à lire
+	  <salle...>         La liste des salles dont on veut afficher les créneaux libres
+	  -r, --repertoire   Lire un répertoire de manière récursive au lieu d'un fichier
+                    
+$ node client.js sallesLibres <fichier> <jour> <heureDebut> <heureFin> [-r]
+Affiche les salles libres sur le créneau du <jour> de <heureDebut> à <heureFin> à partir des données de <fichier>
+    <fichier>          Le fichier .cru à lire
+	  <jour>             Le jour du créneau, L, MA, ME, J, V ou S
+	  <heureDebut>       L'heure de début du créneau, au format hh:mm
+	  <heureFin>         L'heure de fin du créneau, au format hh:mm
+	  -r, --repertoire   Lire un répertoire de manière récursive au lieu d'un fichier
+    
+$ node client.js graphique <fichier> 
+Affiche un graphique du nombre de salles occupées en fonction du créneau à partir des données de <repertoire>
+    <fichier>          Le fichier .cru à lire
+	  -r, --repertoire   Lire un répertoire de manière récursive au lieu d'un fichier
             
-$ node client.js classer <repertoire> 
-  Affiche un tableau avec la capacité maximale d'accueil des salles et le nombre de salles, par ordre croissant de capacité d'accueil à partir des données de <repertoire>       
-    <-d, ---decroissant>
-      Range par ordre décroissant la capacité maximale des salles
-    <repertoire>
-      Le répertoire à utiliser
-                          
-$ node client.js calendrier <repertoire> 
-  Affiche les salles utilisées par <UE> à partir des données de <repertoire>
-    <repertoire>
-      Le répertoire à utiliser
-    <jourDebut> 
-      Le jour où doit débuter le calendrier
-    <jourFin>
-      Le jour où doit finir le calendrier
-    <nom>
-      Le nom de l'utilisateur
-    <UE>
-      Les UEs à ajouter au calendrier
+$ node client.js classer <fichier> 
+Affiche un tableau avec la capacité maximale d'accueil des salles et le nombre de salles, par ordre croissant de capacité d'accueil à partir des données de <afficher>       
+    <fichier>          Le fichier .cru à lire
+    -d, --decroissant  Ranger par ordre décroissant
+	  -r, --repertoire   Lire un répertoire de manière récursive au lieu d'un fichier
+	
+
+```
+> [!WARNING]
+> La fonction calendrier n'a pas été implémentée entièrment. Elle fournit des fichiers iCalendar invalides, et ne contenant aucun événement.
+```                    
+$ node client.js calendrier <fichier> 
+Créer un fichier iCalendar avec le nom <nom>.cru, allant de <jourDebut> à <jourFin>, contenant les événements des <UE> à partir des données de <fichier>
+	  <fichier>         Le fichier .cru à lire
+	  <jourDebut>       Le jour où doit débuter le calendrier
+	  <jourFin>         Le jour où doit finir le calendrier
+	  <nom>             Le nom de l'utilisateur
+	  <UE...>           La liste des UE à ajouter au calendrier
+	  -r, --repertoire  Lire un répertoire de manière récursive au lieu d'un fichier
  ```
   
 ## Implémentation des spécifications
