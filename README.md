@@ -93,3 +93,6 @@ Version 1.0
 DEUMENI Cécile-Audrée (cecile-audree.deumeni_ngaleu@utt.fr)
 PEREIRA Lucile (lucile.pereira@utt.fr)
 GUYOT Pauline (pauline.guyot@utt.fr)
+
+## Licences
+Aucune
