@@ -358,8 +358,8 @@ cli
 // https://icalendar.org/validator.html <= testeur de fichier icalendar
 .command('calendrier', 'Créer un fichier iCalendar avec le nom <nom>.cru, allant de <jourDebut> à <jourFin>, contenant les événements des <UE> à partir des données de <fichier>')
 .argument('<fichier>', 'Le fichier .cru à lire')
-.argument('<jourDebut>', 'Le jour où doit débuter le calendrier')
-.argument('<jourFin>', 'Le jour où doit finir le calendrier')
+.argument('<jourDebut>', 'Le jour où doit débuter le calendrier', {validator : ['L','MA','ME','J','V','S','D']})
+.argument('<jourFin>', 'Le jour où doit finir le calendrier',{validator : ['L','MA','ME','J','V','S','D']})
 .argument('<nom>', "Le nom de l'utilisateur")
 .argument('<UE...>', "La liste des UE à ajouter au calendrier") 
 .option('-r, --repertoire', "Lire un répertoire de manière récursive au lieu d'un fichier", { validator : cli.BOOLEAN, default: false })
