@@ -451,6 +451,19 @@ cli
             })
         }
 	})
+    // enregistrer du texte
+    .command('enregistrer', 'Enregistrer du texte dans un fichier .txt')
+    .argument('<nomFichier>', 'Le nom du fichier .txt à créer')
+    .argument('<texte>', 'Le texte à enregistrer')
+    .action(({ args, logger }) => {
+        fs.writeFile(`${args.nomFichier}.txt`, args.texte, (err) => {
+            if (err) {
+                logger.error('Erreur lors de la création du fichier:', err);
+            } else {
+                logger.info(`Fichier ${args.nomFichier}.txt créé avec succès.`);
+            }
+        });
+    })
 	
 cli.run(process.argv.slice(2));
 	

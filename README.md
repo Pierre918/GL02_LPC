@@ -60,7 +60,11 @@ Affiche un tableau avec la capacité maximale d'accueil des salles et le nombre 
     <fichier>          Le fichier .cru à lire
     -d, --decroissant  Ranger par ordre décroissant
 	  -r, --repertoire   Lire un répertoire de manière récursive au lieu d'un fichier
-	
+
+$ node client.js enregistrer <nomFichier> <texte>
+Enregistre le <texte> dans un fichier <nomFichier>.txt
+	<nomFichier>       Le nom du fichier .txt à créer
+	<texte>            Le texte à enregistrer
 
 ```
 > [!WARNING]
