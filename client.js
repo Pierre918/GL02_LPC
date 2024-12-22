@@ -372,9 +372,11 @@ cli
         if(!jours.includes(args.jourFin)){
             return logger.warn("Le terme " + args.jourFin + " n'est pas un jour valide. Les noms de jour valides sont L, MA, ME, J, V ou S");
         }
-        if(!args.ue.match(/([a-zA-Z0-9][a-zA-Z0-9]+)/)){
-            return logger.warn("Le terme " + args.ue + " n'est pas un nom d'UE valide. Un nom d'UE contient au moins deux caractères.");
-	    }
+        for (const uei of args.ue){
+            if(!uei.match(/([a-zA-Z0-9][a-zA-Z0-9]+)/)){
+                return logger.warn("Le terme " + uei + " n'est pas un nom d'UE valide. Un nom d'UE contient au moins deux caractères.");
+            }
+        }
 	    
 	    // Lire les fichiers 
         var analyzer = new CruParser();
@@ -384,12 +386,11 @@ cli
         else{
             parseCruFile(analyzer, args.fichier, logger);
         }
-        
         // Si les données sont correctes
         if(analyzer.errorCount === 0 && checkForConflicts(analyzer.parsedCRNO).length == 0){
-            let courses = analyzer.parsedCRNO.flatMap(crno => crno.ue);
+            // let courses = [...new Set(analyzer.parsedCRNO.flatMap(crno => crno.ue))]; //pour éviter les doublons
     		// Filtrer les cours par UE
-    		const filteredCourses = courses.filter(course => course.ue === args.ue);
+            const filteredCourses = analyzer.parsedCRNO.filter(elt => args.ue.includes(elt.ue));
     		 // Générer le fichier iCalendar 
     		generateICal(filteredCourses, `${args.nom}.ics`); 
     		//logger.info(`Fichier iCalendar généré pour ${args.nom}`);

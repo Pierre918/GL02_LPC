@@ -39,16 +39,27 @@ function generateICal(courses, outputFilename) {
         console.log("Aucun cours trouvé pour l'UE spécifiée."); 
     } 
     else { 
-        courses.forEach(course => { 
-            console.log(`Ajout du cours: ${course.ue}, ${course.hdeb} - ${course.hfin}`); 
+        courses.forEach(course => {
+            nJour = ['L','MA','ME','J','V','S','D'].indexOf(course.jour);
+            console.log(`Ajout du cours: ${course.ue}, ${course.hdeb} - ${course.hfin}`);
+            
+            if (course.hdeb.toString().length==4){
+                course.hdeb = '0'+course.hdeb
+            }
+            if (course.hfin.toString().length===4){
+                course.hfin = '0'+course.hfin
+            }
             calendar.createEvent({ 
-                debut: `jour:${course.jour} heur: ${course.hdeb}`, 
-                fin: `jour:${course.jour} heur: ${course.hfin}`, 
-               // end: new Date(`${course.jour}T${course.hfin}:00`), 
+                start: new Date(`2024-01-0${(5+nJour).toString()}T${course.hdeb}:00Z`), //on estime que on commence les course la 2e semaine de janvier
+                end: new Date(`2024-01-0${(5+nJour).toString()}T${course.hfin}:00Z`), 
                 summary: course.ue, 
                 location: course.salle,
-                 description: `Type: ${course.type}, Capacite: ${course.capacite}` 
-                }); 
+                description: `Type: ${course.type}, Capacite: ${course.capacite}`,
+                repeating: {
+                    freq: 'weekly',
+                    byDay: ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'][['L','MA','ME','J','V','S','D'].indexOf(course.jour)]  // Tous les jeudis
+                  }
+            }); 
             });
         }
         //calendar.save(outputFilename); 
