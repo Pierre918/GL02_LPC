@@ -5,6 +5,7 @@ const path = require('path');
 const CruParser = require('./CruParser');
 const CRNO = require('./CRNO');
 
+//Foncion pour analyser un répertoire contenant des fichiers CRU
 function parseCruDirectory(parser, directorypath, logger) {
     let files = fs.readdirSync(directorypath, {recursive: true });
 	try{
@@ -18,6 +19,7 @@ function parseCruDirectory(parser, directorypath, logger) {
     }
 }
 
+// Fonction pour analyser un fichier CRU
 function parseCruFile(parser, filepath, logger) {
     try{
     	let data = fs.readFileSync(filepath, 'utf8');
@@ -33,6 +35,7 @@ function parseCruFile(parser, filepath, logger) {
     }
 }
 
+// Fonction pour générer un fichier iCalendar avec les cours
 function generateICal(courses, outputFilename) {
     const calendar = ical({ name: 'Emploi du Temps' });
     if (courses.length === 0) { 
@@ -59,7 +62,7 @@ function generateICal(courses, outputFilename) {
                     freq: 'weekly',
                     byDay: ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'][['L','MA','ME','J','V','S','D'].indexOf(course.jour)]  // Tous les jeudis
                   }
-            }); 
+                }); 
             });
         }
         //calendar.save(outputFilename); 
@@ -70,13 +73,14 @@ function generateICal(courses, outputFilename) {
     
 }
 
-
+// Fonction pour obtenir les salles associées à une UE spécifique
 function getSallesByUE(ue, crno) { 
     courses = crno.filter(course => course.ue && course.ue.trim().toLowerCase() === ue.trim().toLowerCase()); 
     const salles = new Set(courses.map(course => course.salle)); 
     return [...salles]; 
 }
 
+// Fonction pour vérifier les conflits de réservation de salles
 function checkForConflicts(courses) {
     // Utiliser un dictionnaire pour stocker les réservations de salles par créneau horaire 
     const scheduleMap = {}; 
@@ -95,5 +99,5 @@ function checkForConflicts(courses) {
     })
     return conflicts; 
 }
-
+//Export des fonctions
 module.exports = {parseCruDirectory, parseCruFile, generateICal , getSallesByUE, checkForConflicts};
