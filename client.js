@@ -63,17 +63,20 @@ cli
         }
         
         // Si les données sont correctes
-        if(analyzer.errorCount === 0 && checkForConflicts(analyzer.parsedCRNO).length == 0){
+        if(analyzer.errorCount === 0 /*&& checkForConflicts(analyzer.parsedCRNO).length == 0*/){
             // Récupérer les salles pour l'UE'
             const salles = getSallesByUE(args.ue,analyzer.parsedCRNO); 
             if (salles.length === 0) { 
                 logger.info(`Aucune salle trouvée pour l'UE ${args.ue}.`); 
+                
             } 
             
             else { 
                 logger.info(`Salles utilisées pour l'UE ${args.ue}: ${salles.join(', ')}`); 
+                
             } 
         }
+        
     })
 
 	// capacite d'une salle 
