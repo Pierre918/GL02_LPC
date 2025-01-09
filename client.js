@@ -275,85 +275,118 @@ cli
         }
     })	
 
-	// graphique de l'occupation des salles
-	.command('graphique', 'Afficher un graphique du nombre de salles occupées en fonction du créneau à partir des données de <fichier>')
-	.argument('<fichier>', 'Le fichier .cru à lire')
-	.option('-r, --repertoire', "Lire un répertoire de manière récursive au lieu d'un fichier", { validator : cli.BOOLEAN, default: false })
-	.action(({args, options, logger}) => {	
-        // Lire les fichiers
-        var analyzer = new CruParser();
-        if(options.repertoire){
-            parseCruDirectory(analyzer, args.fichier, logger);
+.command('graphique', 'Afficher un graphique du nombre de salles occupées en fonction du créneau à partir des données de <fichier>')
+.argument('<fichier>', 'Le fichier .cru à lire')
+.option('-r, --repertoire', "Lire un répertoire de manière récursive au lieu d'un fichier", { validator : cli.BOOLEAN, default: false })
+.option('-p, --periode <periode>', "Filtrer les données pour une période spécifique (format: JJ/MM/AAAA-JJ/MM/AAAA)")
+.action(({ args, options, logger }) => {
+    const analyzer = new CruParser();
+
+    // Lire les fichiers
+    if (options.repertoire) {
+        parseCruDirectory(analyzer, args.fichier, logger);
+    } else {
+        parseCruFile(analyzer, args.fichier, logger);
+    }
+
+    // Si aucune donnée n'est disponible
+    if (analyzer.parsedCRNO.length === 0) {
+        logger.error("Aucune donnée disponible.");
+        return;
+    }
+
+    // Gestion de la période
+    let periodeDebut = null, periodeFin = null;
+    if (options.periode) {
+        const [debut, fin] = options.periode.split('-').map(dateStr => {
+            if (!dateStr) {
+                logger.error("Format de période incorrect. Utilisez JJ/MM/AAAA-JJ/MM/AAAA.");
+                return null;
+            }
+            return new Date(dateStr.split('/').reverse().join('-'));
+        });
+        periodeDebut = debut;
+        periodeFin = fin;
+
+        if (!periodeDebut || !periodeFin) {
+            logger.error("Les dates de période sont invalides.");
+            return;
         }
-        else{
-            parseCruFile(analyzer, args.fichier, logger);
+    }
+
+    // Séparer les créneaux avec et sans date
+    const withDate = [];
+    const withoutDate = [];
+    analyzer.parsedCRNO.forEach(crno => {
+        if (crno.date) {
+            withDate.push(crno);
+        } else {
+            withoutDate.push(crno);
+            logger.warn(`Créneau sans date ignoré : ${JSON.stringify(crno)}`);
         }
-        
-        // Si les données sont correctes
-        if(analyzer.errorCount === 0 && checkForConflicts(analyzer.parsedCRNO).length == 0){
-            let heures = [8,9,10,11,12,13,14,15,16,17,18,19];
-            
-            // Pour chaque heure
-            var stats = heures.map(heure => {
-                // Récupérer le nom du créneau
-                let creneau = {};
-                creneau.nom =  heure + ":00-" + (heure+1) + ":00";
-                
-                // Récupérer les cours ayant lieu à ce moment
-                let crnoConcurrents = analyzer.parsedCRNO.filter(crno => {
-                    let crnoStartHour = parseInt(crno.hdeb.split(':')[0]);
-                    let crnoEndHour = parseInt(crno.hfin.split(':')[0]);
-                    return (crnoStartHour < (heure+1) && crnoEndHour > heure);
-                });
-                
-                // Récupérer le nombre de cours
-                creneau.nbSallesPrises = crnoConcurrents.length;
-                
-                return creneau;
-            })
-            
-            // Établir les règles vega
-            var statsChart = {
-                "data" : {
-                    "values" : stats
-                },
-                "mark" : "bar",
-                "encoding" : {
-                    "x" : {"field" : "nom", "type" : "nominal",
-                        "axis" : {"title" : "Créneau"}
-                    },
-                    "y" : {"field" : "nbSallesPrises", "type" : "quantitative",
-                        "axis" : {"title" : "Nombre de salles prises"}
-                    }
-                }
-            }   
-            const myChart = vegalite.compile(statsChart).spec;
-            
-            // Exporter au format svg
-            var runtime = vg.parse(myChart);
-            var view = new vg.View(runtime).renderer('svg').run();
-            var mySvg = view.toSVG();
-            mySvg.then(function(res){
-                fs.writeFileSync("./result.svg", res)
-                view.finalize();
-                logger.info("%s", JSON.stringify(myChart, null, 2));
-                logger.info("Chart output : ./result.svg");
-            });
-        
-            /* Canvas version */
-            /*
-            var runtime = vg.parse(myChart);
-            var view = new vg.View(runtime).renderer('canvas').background("#FFF").run();
-            var myCanvas = view.toCanvas();
-            myCanvas.then(function(res){
-                fs.writeFileSync("./result.png", res.toBuffer());
-                view.finalize();
-                logger.info(myChart);
-                logger.info("Chart output : ./result.png");
-            })	
-            */
+    });
+
+    // Filtrer les créneaux avec date pour la période
+    const filteredCRNO = withDate.filter(crno => {
+        const crnoDate = new Date(crno.date.split('/').reverse().join('-'));
+        return (!periodeDebut || !periodeFin || (crnoDate >= periodeDebut && crnoDate <= periodeFin));
+    });
+
+    if (filteredCRNO.length === 0 && withoutDate.length === 0) {
+        logger.error("Aucune donnée disponible pour la période spécifiée.");
+        return;
+    }
+
+    // Génération des statistiques
+    const heures = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
+    const stats = heures.map(heure => {
+        const creneau = {};
+        creneau.nom = heure + ":00-" + (heure + 1) + ":00";
+
+        const crnoConcurrents = filteredCRNO.filter(crno => {
+            const crnoStartHour = parseInt(crno.hdeb.split(':')[0]);
+            const crnoEndHour = parseInt(crno.hfin.split(':')[0]);
+            return (crnoStartHour < (heure + 1) && crnoEndHour > heure);
+        });
+
+        creneau.nbSallesPrises = crnoConcurrents.length;
+        return creneau;
+    });
+
+    // Ajouter une catégorie spéciale pour les créneaux sans date
+    if (withoutDate.length > 0) {
+        stats.push({
+            nom: "Date inconnue",
+            nbSallesPrises: withoutDate.length,
+        });
+    }
+
+    // Configuration du graphique Vega
+    const statsChart = {
+        "data": {
+            "values": stats
+        },
+        "mark": "bar",
+        "encoding": {
+            "x": { "field": "nom", "type": "nominal", "axis": { "title": "Créneau" } },
+            "y": { "field": "nbSallesPrises", "type": "quantitative", "axis": { "title": "Nombre de salles prises" } }
         }
-    })		
+    };
+    const myChart = vegalite.compile(statsChart).spec;
+
+    // Exportation au format SVG
+    const runtime = vg.parse(myChart);
+    const view = new vg.View(runtime).renderer('svg').run();
+    const mySvg = view.toSVG();
+    mySvg.then(function (res) {
+        fs.writeFileSync("./result.svg", res);
+        view.finalize();
+        logger.info("%s", JSON.stringify(myChart, null, 2));
+        logger.info("Chart output : ./result.svg");
+    });
+})
+
+
 
 	
 
