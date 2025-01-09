@@ -54,6 +54,9 @@ $ node client.js graphique <fichier>
 Affiche un graphique du nombre de salles occupées en fonction du créneau à partir des données de <repertoire>
     <fichier>          Le fichier .cru à lire
 	  -r, --repertoire   Lire un répertoire de manière récursive au lieu d'un fichier
+	    -p, --periode      Spécifier une période à analyser au format "JJ/MM/AAAA-JJ/MM/AAAA"
+		exemple (node client.js graphique SujetA_data/AB/edt.cru --periode "01/01/2024-07/01/2024")
+
             
 $ node client.js classer <fichier> 
 Affiche un tableau avec la capacité maximale d'accueil des salles et le nombre de salles, par ordre croissant de capacité d'accueil à partir des données de <afficher>       
